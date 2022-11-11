@@ -38,13 +38,13 @@ D3D12_INDEX_BUFFER_VIEW Object3d::ibView{};
 std::vector<Object3d::VertexPosNormalUv> Object3d::vertices;
 std::vector<unsigned short> Object3d::indices;
 
-void Object3d::StaticInitialize(ID3D12Device * device, int window_width, int window_height)
+void Object3d::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
 {
 	// nullptrチェック
 	assert(device);
 
 	Object3d::device = device;
-		
+
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
 
@@ -62,7 +62,7 @@ void Object3d::StaticInitialize(ID3D12Device * device, int window_width, int win
 
 }
 
-void Object3d::PreDraw(ID3D12GraphicsCommandList * cmdList)
+void Object3d::PreDraw(ID3D12GraphicsCommandList* cmdList)
 {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(Object3d::cmdList == nullptr);
@@ -84,7 +84,7 @@ void Object3d::PostDraw()
 	Object3d::cmdList = nullptr;
 }
 
-Object3d * Object3d::Create()
+Object3d* Object3d::Create()
 {
 	float scale_val = 20;
 
@@ -138,7 +138,7 @@ void Object3d::CameraMoveVector(XMFLOAT3 move)
 void Object3d::InitializeDescriptorHeap()
 {
 	HRESULT result = S_FALSE;
-	
+
 	// デスクリプタヒープを生成	
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -329,7 +329,7 @@ void Object3d::LoadTexture()
 	ScratchImage scratchImg{};
 
 	// WICテクスチャのロード
-	result = LoadFromWICFile( L"Resources/texture.png", WIC_FLAGS_NONE, &metadata, scratchImg);
+	result = LoadFromWICFile(L"Resources/tex1.png", WIC_FLAGS_NONE, &metadata, scratchImg);
 	assert(SUCCEEDED(result));
 
 	ScratchImage mipChain{};
@@ -419,7 +419,7 @@ void Object3d::CreateModel()
 		std::string key;
 		getline(line_stream, key, ' ');
 
-		// 先頭モゾ列がvなら頂点座標
+		// 先頭文字列がvなら頂点座標
 		if (key == "v") {
 			// X,Y,Z座標読み込み
 			XMFLOAT3 position{};
@@ -428,63 +428,64 @@ void Object3d::CreateModel()
 			line_stream >> position.z;
 			// 座標データに追加
 			positions.emplace_back(position);
-		}
-		//先頭文字列がfならポリゴン (三角形)
-		if (key == "f"){
-			// 半角スペース区切りで行の続きを読み込む
-			std::string index_string;
-			while (getline(line_stream,index_string,' '))
-			{
-				//頂点インデックス1個分の文字列をストリームに変換して解析しやすくする
-				std::istringstream index_stream(index_string);
-				unsigned short indexPosition, indexNormal, indexTexcoord;
-				index_stream >> indexPosition;
-				index_stream.seekg(1, std::ios_base::cur);
-				index_stream >> indexTexcoord;
-				index_stream.seekg(1, std::ios_base::cur);
-				index_stream >> indexNormal;
-				// 頂点データの追加
-				VertexPosNormalUv vertex{};
-				vertex.pos = positions[indexPosition - 1];
-				vertex.normal = normals[indexNormal - 1];
-				vertex.uv = texcoords[indexTexcoord - 1];
-				vertices.emplace_back(vertex);
-				// インデックスデータの追加
-				indices.emplace_back((unsigned short)indices.size());
-				//頂点インデックスに追加
-				indices.emplace_back(indexPosition - 1);
-			}
+			// 頂点データ
+			
 		}
 		// 先頭文字列がvtならテクスチャ
 		if (key == "vt") {
-			// U,V座標読み込み
+			// u,v成分読み込み
 			XMFLOAT2 texcoord{};
 			line_stream >> texcoord.x;
 			line_stream >> texcoord.y;
-			// V方向反転
+			// v方向反転
 			texcoord.y = 1.0f - texcoord.y;
 			//テクスチャ座標データに追加
 			texcoords.emplace_back(texcoord);
 		}
 		// 先頭文字列がvnなら法線ベクトル
 		if (key == "vn") {
-			// X,Y,Z成分読み込み
+			// x,y,z成分読み込み
 			XMFLOAT3 normal{};
 			line_stream >> normal.x;
 			line_stream >> normal.y;
 			line_stream >> normal.z;
-			//法線ベクトルデータに追加
+			// 法線ベクトルデータに追加
 			normals.emplace_back(normal);
+		}
+		//先頭文字列がfならポリゴン (三角形)
+		if (key == "f")
+		{
+			// 半角スペース区切りで行の続きを読み込む
+			std::string index_string;
+			while (getline(line_stream, index_string, ' '))
+			{
+				//頂点インデックス1個分の文字列をストリームに変換して解析しやすくする
+				std::istringstream index_stream(index_string);
+				unsigned short indexPosition, indexNormal, indexTexcoord;
+				index_stream >> indexPosition;
+				index_stream.seekg(1, std::ios_base::cur);// スラッシュを飛ばす
+				index_stream >> indexTexcoord;
+				index_stream.seekg(1, std::ios_base::cur);// スラッシュを飛ばす
+				index_stream >> indexNormal;
+				//頂点データの追加
+				VertexPosNormalUv vertex{};
+				vertex.pos = positions[indexPosition - 1];
+				vertex.normal = normals[indexNormal - 1];
+				vertex.uv = texcoords[indexTexcoord - 1];
+				vertices.emplace_back(vertex);
+				//頂点インデックスに追加
+				indices.emplace_back((unsigned short)indices.size());
+			}
 		}
 	}
 	file.close();
 	HRESULT result = S_FALSE;
 
 	std::vector<VertexPosNormalUv> realVertices;
-	
+
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosNormalUv) * vertices.size());
 	UINT sizeIB = static_cast<UINT>(sizeof(unsigned short) * indices.size());
-	
+
 	// ヒーププロパティ
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	// リソース設定
