@@ -429,7 +429,7 @@ void Object3d::CreateModel()
 			// 座標データに追加
 			positions.emplace_back(position);
 			// 頂点データ
-			
+
 		}
 		// 先頭文字列がvtならテクスチャ
 		if (key == "vt") {
