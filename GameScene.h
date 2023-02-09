@@ -1,11 +1,11 @@
 ﻿#pragma once
-
 #include "DirectXCommon.h"
 #include <DirectXMath.h>
 #include "Input.h"
 #include "Sprite.h"
 #include "Object3d.h"
 #include "DebugText.h"
+#include"Model.h"
 
 /// <summary>
 /// ゲームシーン
@@ -54,12 +54,15 @@ public: // メンバ関数
 private: // メンバ変数
 	DirectXCommon* dxCommon = nullptr;
 	Input* input = nullptr;
-	DebugText debugText;	
+	DebugText debugText;
 
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
 	Sprite* spriteBG = nullptr;
-	Object3d* object3d = nullptr;
+	Object3d* sphere = nullptr;
+	Object3d* ground = nullptr;
+	//モデル
+	Model* sphereModel;
+	Model* groundModel;
 };
-
