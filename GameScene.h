@@ -65,7 +65,11 @@ private: // メンバ変数
 	Object3d* groundObject = nullptr;
 	//モデル
 	Model* sphereModel;
+	Model* sphereHitModel;
 	Model* groundModel;
+
+	XMFLOAT3 position;
+	float speed = 0.1;
 #pragma region Collision
 	//球
 	Sphere sphere;
