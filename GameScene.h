@@ -6,6 +6,7 @@
 #include "Object3d.h"
 #include "DebugText.h"
 #include"Model.h"
+#include "CollisionPrimitive.h"
 
 /// <summary>
 /// ゲームシーン
@@ -60,9 +61,15 @@ private: // メンバ変数
 	/// ゲームシーン用
 	/// </summary>
 	Sprite* spriteBG = nullptr;
-	Object3d* sphere = nullptr;
-	Object3d* ground = nullptr;
+	Object3d* sphereObject = nullptr;
+	Object3d* groundObject = nullptr;
 	//モデル
 	Model* sphereModel;
 	Model* groundModel;
+#pragma region Collision
+	//球
+	Sphere sphere;
+	//平面
+	Plane plane;
+#pragma endregion
 };
